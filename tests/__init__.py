@@ -1,0 +1,3 @@
+from tests.vizdoom_test import VizdoomBasicTest
+from tests.vizdoom_test import VizdoomMyWayHomeTest
+from tests.miniworld_test import MiniworldTest
