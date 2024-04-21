@@ -66,6 +66,3 @@ class GymTestCartpole():
 
                 observation = next_state
                 hx = next_hx
-
-                if done:
-                    print('Perdio')
