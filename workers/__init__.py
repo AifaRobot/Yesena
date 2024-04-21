@@ -1,4 +1,6 @@
 from workers.workers import WorkerFactoryMiniworld
 from workers.workers import WorkerFactoryVizdoomBasic
 from workers.workers import WorkerFactoryVizdoomMyWayHome
+from workers.workers import WorkerFactoryGymAcrobot
+from workers.workers import WorkerFactoryGymCartpole
 from workers.worker import Worker

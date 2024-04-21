@@ -3,13 +3,8 @@ import gym_miniworld
 from wrappers.skip_and_frames_env import SkipAndFramesEnv
 from wrappers.vizdoomenv_basic import Vizdoomenv
 from wrappers.vizdoomenv_my_way_home import Vizdoomenvmywayhome
+from wrappers.gym_env import GymEnvAcrobot, GymEnvCartpole
 from workers.worker import Worker
-import torch
-import gym
-import gym_miniworld
-import torch
-import time
-from agents import Agent
 
 class WorkerFactory:
     def __init__(self, env_name, in_channels, batch_size):
@@ -59,3 +54,28 @@ class WorkerFactoryVizdoomMyWayHome(WorkerFactory):
 
         return worker
 
+class WorkerFactoryGymAcrobot(WorkerFactory):
+
+    def __init__(self, env_name, in_channels, batch_size):
+        super().__init__(env_name, in_channels, batch_size)
+
+    def create(self, agent):
+        raw_env = gym.make(self.env_name)
+        env = GymEnvAcrobot(raw_env)
+
+        worker = Worker(env, agent, self.batch_size)
+
+        return worker
+
+class WorkerFactoryGymCartpole(WorkerFactory):
+
+    def __init__(self, env_name, in_channels, batch_size):
+        super().__init__(env_name, in_channels, batch_size)
+
+    def create(self, agent):
+        raw_env = gym.make(self.env_name)
+        env = GymEnvCartpole(raw_env)
+
+        worker = Worker(env, agent, self.batch_size)
+
+        return worker

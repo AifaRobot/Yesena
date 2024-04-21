@@ -2,5 +2,6 @@ from models.actor_critic_network import ActorCriticNetwork
 from models.curiosity_network import CuriosityNetwork
 from models.actor_critic_network_2 import ActorCriticFactory2
 from models.actor_critic_network import ActorCriticFactory
+from models.actor_critic_network_3 import ActorCriticFactory3
 from models.curiosity_network import CuriosityFactory
 from models.no_curiosity_network import NoCuriosityFactory

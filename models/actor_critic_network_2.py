@@ -106,7 +106,7 @@ class ActorCriticNetwork2():
             print('Se ha cargado un modelo para la red neuronal actor')
             self.actor.load_state_dict(torch.load(save_path + '/actor.pt'))
         else:
-            print('No se ha encontrado ningun podelo para la red neuronal')
+            print('No se ha encontrado ningun modelo para la red neuronal')
 
         if(os.path.isfile(save_path + '/critic.pt')):
             print('Se ha cargado un modelo para la red neuronal critico')

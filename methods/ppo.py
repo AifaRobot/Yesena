@@ -64,8 +64,8 @@ class PPO(MethodBase):
         extrinsic_rewards = torch.tensor(extrinsic_rewards_batch)
         intrinsic_rewards = torch.tensor(intrinsic_rewards_batch)
 
-        combine_rewards = extrinsic_rewards + intrinsic_rewards        
-        
+        combine_rewards = extrinsic_rewards + intrinsic_rewards
+
         values = torch.cat((values, last_value), dim=0)
         advantages = self.generalized_advantage.calculate_generalized_advantage_estimate(combine_rewards, values, dones)
         

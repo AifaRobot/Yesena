@@ -63,7 +63,7 @@ class ActorCriticNetwork(nn.Module):
             print('Se ha cargado un modelo para la red neuronal')
             self.load_state_dict(torch.load(save_path + '/actor_critic.pt'))
         else:
-            print('No se ha encontrado ningun podelo para la red neuronal')
+            print('No se ha encontrado ningun modelo para la red neuronal')
 
     def get_new_hx(self):
         return torch.zeros(512)
