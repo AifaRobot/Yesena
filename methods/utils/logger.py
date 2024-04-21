@@ -28,7 +28,7 @@ class Logger():
         if('critic_losses' in dict_metrics):
             self.history_loss_critic.append(np.array(dict_metrics['critic_losses']).mean())
         if('actor_critic_losses' in dict_metrics):
-            self.history_loss_critic.append(np.array(dict_metrics['actor_critic_losses']).mean())
+            self.history_loss_actor_critic.append(np.array(dict_metrics['actor_critic_losses']).mean())
 
     def draw_plot(self, title, xlabel, ylabel, title_file, history_score, color = "red"):
         new_array = []
@@ -50,17 +50,17 @@ class Logger():
         now = datetime.now()
         path = self.path_name + '/' + self.method_name + '-' + self.env_name + '/' + now.strftime("%d%m%Y%H%M%S")
 
-        os.mkdir(path) 
+        os.mkdir(path)
 
         if(len(self.history_intrinsic_rewards) > 0):
             self.draw_plot("Recompensa Intrinseca Historial", "Ciclos", "Recompensa", path + "/recompensa_intrinseca_historial.png", self.history_intrinsic_rewards)
         if(len(self.history_extrinsic_rewards) > 0):
             self.draw_plot("Recompensas Extrinseca Historial", "Ciclos", "Recompensa", path + "/recompensa_extrinseca_historial.png", self.history_extrinsic_rewards)
-        if(len(self.history_intrinsic_rewards) > 0):
-            self.draw_plot("Perdidas Curiosity", "Ciclos", "Perdida", path + "/perdida_curiosity_historial.png", self.history_intrinsic_rewards)
+        if(len(self.history_loss_curiosity) > 0):
+            self.draw_plot("Perdidas Curiosity", "Ciclos", "Perdida", path + "/perdida_curiosity_historial.png", self.history_loss_curiosity)
         if(len(self.history_loss_actor) > 0):
             self.draw_plot("Perdidas Actor", "Ciclos", "Perdida", path + "/perdida_actor_historial.png", self.history_loss_actor)
-        if(len(self.history_intrinsic_rewards) > 0):
-            self.draw_plot("Perdidas Critic", "Ciclos", "Perdida", path + "/perdida_critic_historial.png", self.history_intrinsic_rewards)
+        if(len(self.history_loss_critic) > 0):
+            self.draw_plot("Perdidas Critic", "Ciclos", "Perdida", path + "/perdida_critic_historial.png", self.history_loss_critic)
         if(len(self.history_loss_actor_critic) > 0):
             self.draw_plot("Perdidas Actor Critic", "Ciclos", "Perdida", path + "/perdida_actor_critic_historial.png", self.history_loss_actor_critic)
