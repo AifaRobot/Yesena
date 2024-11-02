@@ -1,8 +1,6 @@
 from wrappers.skip_and_frames_env import SkipAndFramesEnv
 from wrappers.vizdoomenv_basic import Vizdoomenv
 from wrappers.vizdoomenv_my_way_home import Vizdoomenvmywayhome
-
-import torch
 from agents import Agent
 
 class VizdoomBasicTest():
@@ -31,7 +29,7 @@ class VizdoomBasicTest():
         while True:
             done = False
             observation = worker.reset()
-            hx = torch.zeros(512)
+            hx = agente.get_new_hx()
 
             while not done: 
                 action, next_hx = agente.get_action_max_prob(observation, hx)

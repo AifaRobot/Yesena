@@ -1,10 +1,14 @@
-import gym
-import gym_miniworld
+import gymnasium as gym
 from wrappers.skip_and_frames_env import SkipAndFramesEnv
 from wrappers.vizdoomenv_basic import Vizdoomenv
 from wrappers.vizdoomenv_my_way_home import Vizdoomenvmywayhome
-from wrappers.gym_env import GymEnvAcrobot, GymEnvCartpole
+from wrappers.gym_env import GymEnvAcrobot, GymEnvCartpole, GymEnvLunarLander, GymEnvCarRacing, GymEnvMiniworld
 from workers.worker import Worker
+
+'''
+    Aquí están todos los encargados de crear los Workers. Cada Worker necesita una configuración diferente dependiendo
+    del entorno.
+'''
 
 class WorkerFactory:
     def __init__(self, env_name, in_channels, batch_size):
@@ -23,7 +27,8 @@ class WorkerFactoryMiniworld(WorkerFactory):
 
     def create(self, agent):
         raw_env = gym.make(self.env_name)
-        env = SkipAndFramesEnv(raw_env, self.in_channels)
+        env = GymEnvMiniworld(raw_env)
+        env = SkipAndFramesEnv(env, self.in_channels)
         worker = Worker(env, agent, self.batch_size)
 
         return worker
@@ -75,6 +80,34 @@ class WorkerFactoryGymCartpole(WorkerFactory):
     def create(self, agent):
         raw_env = gym.make(self.env_name)
         env = GymEnvCartpole(raw_env)
+
+        worker = Worker(env, agent, self.batch_size)
+
+        return worker
+
+class WorkerFactoryGymLunarLander(WorkerFactory):
+
+    def __init__(self, env_name, in_channels, batch_size):
+        super().__init__(env_name, in_channels, batch_size)
+
+    def create(self, agent):
+        raw_env = gym.make(self.env_name)
+        env = GymEnvLunarLander(raw_env)
+
+        worker = Worker(env, agent, self.batch_size)
+
+        return worker
+
+class WorkerFactoryGymCarRacing(WorkerFactory):
+
+    def __init__(self, env_name, in_channels, batch_size, continuous=False):
+        super().__init__(env_name, in_channels, batch_size)
+        self.continuous = continuous
+
+    def create(self, agent):
+        raw_env = gym.make(self.env_name)
+        env = GymEnvCarRacing(raw_env)
+        env = SkipAndFramesEnv(env, self.in_channels, (42, 42), None, 80)
 
         worker = Worker(env, agent, self.batch_size)
 

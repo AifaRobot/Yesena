@@ -3,4 +3,6 @@ from workers.workers import WorkerFactoryVizdoomBasic
 from workers.workers import WorkerFactoryVizdoomMyWayHome
 from workers.workers import WorkerFactoryGymAcrobot
 from workers.workers import WorkerFactoryGymCartpole
+from workers.workers import WorkerFactoryGymLunarLander
+from workers.workers import WorkerFactoryGymCarRacing
 from workers.worker import Worker

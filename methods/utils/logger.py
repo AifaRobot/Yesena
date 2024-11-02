@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from datetime import datetime
+from multiprocessing.managers import SyncManager
 
 class Logger():
     def __init__(self, method_name, env_name):
@@ -9,12 +10,15 @@ class Logger():
         self.env_name = env_name
         self.path_name = 'plots'
 
-        self.history_loss_curiosity = []
-        self.history_loss_actor = []
-        self.history_loss_critic = []
-        self.history_loss_actor_critic = []
-        self.history_extrinsic_rewards = []
-        self.history_intrinsic_rewards = []
+        manager = SyncManager()
+        manager.start()
+
+        self.history_loss_curiosity = manager.list()
+        self.history_loss_actor = manager.list()
+        self.history_loss_critic = manager.list()
+        self.history_loss_actor_critic = manager.list()
+        self.history_extrinsic_rewards = manager.list()
+        self.history_intrinsic_rewards = manager.list()
 
     def update_metrics(self, dict_metrics):
         if('intrinsic_rewards' in dict_metrics):

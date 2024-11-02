@@ -3,8 +3,8 @@ class Worker:
         self.env = env
         self.agente = agente
         self.batch_size = batch_size
-        self.observation = self.env.reset()
 
+        self.observation = self.env.reset()
         self.hx = self.agente.get_new_hx()
 
     def run(self):
@@ -27,9 +27,9 @@ class Worker:
             intrinsic_reward = self.agente.curiosity.calc_reward(self.observation, next_observation, action)
 
             if done:
-                self.hx = self.agente.get_new_hx()
                 next_observation = self.env.reset()
-            
+                next_hx = self.agente.get_new_hx()
+
             observations.append(self.observation.squeeze(0))
             actions.append(action)
             rewards.append(reward)

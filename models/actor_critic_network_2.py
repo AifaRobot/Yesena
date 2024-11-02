@@ -1,11 +1,10 @@
 import torch.nn as nn
-import torch
-import os
 from activations import Swish
+from models.network_base import NetworkBase
 
-class ActorNetwork(nn.Module):
+class ActorNetwork(NetworkBase):
     def __init__(self, n_actions, in_chanels, size_output_layer):
-        super(ActorNetwork, self).__init__()
+        super(ActorNetwork, self).__init__('actor')
 
         self.size_output_layer = size_output_layer
 
@@ -38,9 +37,9 @@ class ActorNetwork(nn.Module):
 
         return distribution
 
-class CriticNetwork(nn.Module):
+class CriticNetwork(NetworkBase):
     def __init__(self, in_chanels, size_output_layer):
-        super(CriticNetwork, self).__init__()
+        super(CriticNetwork, self).__init__('critic')
 
         self.size_output_layer = size_output_layer
        
@@ -89,30 +88,13 @@ class ActorCriticNetwork2():
 
         return distribution, value, hx
 
-    def get_new_hx(self):
-        return torch.zeros(512)
-
     def save(self, save_path):
-        print('Guardando modelos...')
-        
-        if(os.path.exists(save_path) == False):
-            os.mkdir(save_path)
-        
-        torch.save(self.actor.state_dict(), save_path + '/actor.pt')
-        torch.save(self.critic.state_dict(), save_path + '/critic.pt')
+        self.actor.save(save_path)
+        self.critic.save(save_path)
 
     def load(self, save_path):
-        if(os.path.isfile(save_path + '/actor.pt')):
-            print('Se ha cargado un modelo para la red neuronal actor')
-            self.actor.load_state_dict(torch.load(save_path + '/actor.pt'))
-        else:
-            print('No se ha encontrado ningun modelo para la red neuronal')
-
-        if(os.path.isfile(save_path + '/critic.pt')):
-            print('Se ha cargado un modelo para la red neuronal critico')
-            self.critic.load_state_dict(torch.load(save_path + '/critic.pt'))
-        else:
-            print('No se ha encontrado ningun modelo de curiosidad para la red neuronal')
+        self.actor.load(save_path)
+        self.critic.load(save_path)
 
 class ActorCriticFactory2():
     def __init__(self, in_chanels, n_actions):

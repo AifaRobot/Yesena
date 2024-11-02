@@ -1,11 +1,11 @@
 import torch.nn as nn
 import torch
-import os
 from activations import Swish
+from models.network_base import NetworkBase
 
-class CuriosityNetwork(nn.Module):
+class CuriosityNetwork(NetworkBase):
     def __init__(self, in_chanels, n_actions, alpha, beta):
-        super(CuriosityNetwork, self).__init__()
+        super(CuriosityNetwork, self).__init__('curiosity')
         
         self.size_output_layer = 288
         self.alpha = alpha
@@ -48,7 +48,6 @@ class CuriosityNetwork(nn.Module):
 
         return phi_new, phi_hat_new, pi_logits
 
-
     def calc_reward(self, observation, next_observation, action):
         phi_new, phi_hat_new, _ = self.forward(observation, next_observation, action.view(-1, 1))
 
@@ -64,23 +63,6 @@ class CuriosityNetwork(nn.Module):
         L_F = self.beta * self.forward_loss(phi_hat_new, phi_new)
 
         return L_I + L_F
-
-    def save(self, save_path):
-        print('Guardando modelos...')
-        
-        if(os.path.exists(save_path) == False):
-            os.mkdir(save_path)
-        
-        torch.save(self.state_dict(), save_path + '/curiosity.pt')
-
-    def load(self, save_path):
-        
-        if(os.path.isfile(save_path + '/curiosity.pt')):
-            print('Se ha cargado un modelo para la red neuronal Curiosidad')
-            self.load_state_dict(torch.load(save_path + '/curiosity.pt'))
-        else:
-            print('No se ha encontrado ningun podelo para la red neuronal')
-
 
 class CuriosityFactory():
 

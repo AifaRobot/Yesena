@@ -5,6 +5,12 @@ from agents.utils import Batch_DataSet
 from torch.distributions import Categorical
 from methods.method_base import MethodBase
 
+'''
+    Trust Region Policy Optimization (TRPO) es un algoritmo de aprendizaje por refuerzo diseñado para optimizar políticas en 
+    entornos continuos y de gran dimensión, como en robótica o juegos complejos. TRPO se centra en mejorar la estabilidad y 
+    eficiencia de las actualizaciones de políticas para evitar cambios drásticos que puedan degradar el rendimiento.
+'''
+
 class TRPO(MethodBase):
     def __init__(self, env_name, main_model_factory, worker_factory, test_factory, 
             arguments, curiosity_model_factory = '', optimizer = '', generalized_value = '', 
@@ -17,143 +23,125 @@ class TRPO(MethodBase):
             optimizer, generalized_value, generalized_advantage,
             save_path, env_name, self.name)
 
-        self.global_agent.curiosity.share_memory()
-        self.global_agent.actor_critic.critic.share_memory()
-
         self.global_agent.optimizer = self.optimizer(
             list(self.global_agent.curiosity.parameters()) +
             list(self.global_agent.actor_critic.critic.parameters()),
             lr=self.learning_rate
         )
 
-    def optimize_actor(self, loss_dict: dict, loss_fn, actor_critic):
-        loss = loss_dict["a_loss"]
-        grads = torch.autograd.grad(loss, actor_critic.actor.parameters())
+    def optimize_actor(self, loss_dict, loss_fn):
+        loss = loss_dict["actor_loss"]
+        grads = torch.autograd.grad(loss, self.global_agent.actor_critic.actor.parameters())
         j = torch.cat([g.view(-1) for g in grads]).data
 
+        # Se crea la funcion para calcular el producto del Vector Fisher. El Vector Fisher cuantifica cómo cambia la función de costo en 
+        # la dirección específica dada por y
         def fisher_vector_product(y):
             kl = loss_fn()["kl"]
 
-            grads = torch.autograd.grad(kl, actor_critic.actor.parameters(), create_graph=True)
+            grads = torch.autograd.grad(kl, self.global_agent.actor_critic.actor.parameters(), create_graph=True)
             flat_grads = torch.cat([g.view(-1) for g in grads])
 
             inner_prod = flat_grads.t() @ y  
-            
-            grads = torch.autograd.grad(inner_prod, actor_critic.actor.parameters()) 
+
+            grads = torch.autograd.grad(inner_prod, self.global_agent.actor_critic.actor.parameters())
             flat_grads = torch.cat([g.contiguous().view(-1) for g in grads]).data
             return flat_grads + y * self.damping
 
-        opt_dir = cg(fisher_vector_product, -j, self.k)
+        # Calculamos el gradiente conjugado para conocer la direccion de cambio de nuestros pesos y sesgos de la red actor
+        opt_dir = conjugate_gradient(fisher_vector_product, -j, self.k) 
         quadratic_term = (opt_dir * fisher_vector_product(opt_dir)).sum()
+        # beta es la magnitud del máximo paso posible y se calcula con la siguiente ecuación β = (2 * δ) / (s^T * Hs)
         beta = torch.sqrt(2 * self.trust_region / (quadratic_term + 1e-6))
+        # El paso optimo se calcula como la multiplicacion entre beta (la longitud del paso) y opt_dir (la direccion del paso)
         opt_step = beta * opt_dir
 
         with torch.no_grad():
-            old_loss = loss_fn()["a_loss"]
-            flat_params = get_flat_params_from(actor_critic.actor)
+            old_loss = loss_fn()["actor_loss"]
+            # Se obtienen los pesos y sesgos de la red neuronal actor para utilizarlos en caso de que el 
+            # procesos de line search no mejore la perdida del actor
+            flat_params = get_flat_params_from(self.global_agent.actor_critic.actor) 
             exponent_shrink = 1
             params_updated = False
 
             for _ in range(self.line_search_num):
                 new_params = flat_params + opt_step * exponent_shrink
 
-                set_flat_params_to(new_params, actor_critic.actor)
+                # Se reemplazan los pesos y sesgos de la red neuronal actor por los nuevos
+                set_flat_params_to(new_params, self.global_agent.actor_critic.actor)
                 tmp = loss_fn()
-                new_loss = tmp["a_loss"]
+                new_loss = tmp["actor_loss"]
                 new_kl = tmp["kl"]
-                improvement = old_loss - new_loss
 
-                if new_kl < 1.5 * self.trust_region and improvement >= 0 and torch.isfinite(new_loss):
+                # Se resta la recompensa vieja con la nueva. Si el resultado es positivo significa que hubo una mejora porque 
+                # se redujo el error
+                improvement = old_loss - new_loss 
+
+                if new_kl < self.trust_region and improvement >= 0 and torch.isfinite(new_loss):
+                    # Si la divergencia de kullback-leibler es es menor a la region de confianza y la nueva perdida es menor a la 
+                    # perdida vieja, se termina el bucle y se deja el actor con los nuevos pesos y sesgos
                     params_updated = True
-                    return opt_step * exponent_shrink
+                    break
 
                 exponent_shrink *= 0.5
+
             if not params_updated:
-                set_flat_params_to(flat_params, actor_critic.actor)
-            
-            return []
+                # Si los nuevos pesos y sesgos de la red neuronal actor no reducen la funcion de perdida, reemplaza todos los pesos y sesgos 
+                # por los que tenia inicialmente
+                set_flat_params_to(flat_params, self.global_agent.actor_critic.actor)
 
-    def trpo_step(self, states, actions, old_log_prob, old_probs, advs, actor_critic):
+    def trpo_step(self, observations, actions, old_log_probs, old_distributions, advantages):
 
-        def get_actor_loss() -> dict:
-            probs = actor_critic.actor.forward(states)
+        def get_actor_loss():
+            distributions = self.global_agent.actor_critic.actor.forward(observations)
  
-            dist = Categorical(probs)
-            log_prob = dist.log_prob(actions)
-            ent = dist.entropy().mean()
+            m = Categorical(distributions)
+            log_prob = m.log_prob(actions)
+            entropys = m.entropy()
 
-            a_loss = -torch.mean((log_prob - old_log_prob).exp() * advs) - self.c2 * ent
-            kl = categorical_kl(probs, old_probs).mean()
+            ratios = torch.exp(log_prob - old_log_probs)
 
-            return dict(a_loss=a_loss, ent=ent, kl=kl)
+            actor_loss = -torch.mean(ratios * advantages) - self.entropy_coeficient * entropys.mean()
+            kl = categorical_kl(distributions, old_distributions).mean() # Se calcula la divergencia de kullback-leibler
+
+            return dict(actor_loss=actor_loss, kl=kl)
 
         loss_dict = get_actor_loss()
 
-        grads = self.optimize_actor(loss_dict, get_actor_loss, actor_critic)
+        self.optimize_actor(loss_dict, get_actor_loss)
 
-        return grads, loss_dict['a_loss']
+        return loss_dict['actor_loss']
 
-    def update(self, rollout, local_agent):
+    def update(self, rollout):
         actor_losses = []
         critic_losses = []
         curiosity_losses = []
 
-        observations_batch, actions_batch, extrinsic_rewards_batch, dones_batch, values_batch, old_log_probs_batch, hxs_batch, intrinsic_rewards_batch, last_value, distributions_batch = rollout
-        
-        observations = torch.stack(observations_batch[:-1])
-        next_observations = torch.stack(observations_batch[1:])
-        actions = torch.stack(actions_batch[:-1])
-        old_log_probs = torch.stack(old_log_probs_batch[:-1])
-        hxs = torch.stack(hxs_batch[:-1])
-        distributions = torch.stack(distributions_batch[:-1])
-        values = torch.tensor(values_batch)
-        dones = torch.tensor(dones_batch)
+        observations, next_observations, actions, advantages, old_log_probs, hxs, value_targets, distributions, values, extrinsic_rewards, intrinsic_rewards = rollout
 
-        extrinsic_rewards = torch.tensor(extrinsic_rewards_batch)
-        intrinsic_rewards = torch.tensor(intrinsic_rewards_batch)
+        actor_loss = self.trpo_step(observations, actions, old_log_probs, distributions, advantages)
 
-        combine_rewards = extrinsic_rewards + intrinsic_rewards        
-        
-        values = torch.cat((values, last_value), dim=0)
-        advantages = self.generalized_advantage.calculate_generalized_advantage_estimate(combine_rewards, values, dones)
-        
-        combine_rewards = torch.cat((combine_rewards, last_value), dim=0)
-        value_targets = self.generalized_value.calculate_discounted_rewards(combine_rewards, dones)[:-1]
-        
-        actor_gradients, a_loss = self.trpo_step(
-            observations, 
-            actions, 
-            old_log_probs, 
-            distributions, 
-            advantages, 
-            local_agent.actor_critic
-        )
+        actor_losses.append(actor_loss.item())
 
-        if(actor_gradients != []):
-            flat_params = get_flat_params_from(self.global_agent.actor_critic.actor)
-            new_params = actor_gradients + flat_params
-            set_flat_params_to(new_params, self.global_agent.actor_critic.actor)
-
-        local_agent.actor_critic.actor.load_state_dict(self.global_agent.actor_critic.actor.state_dict())
-
-        actor_losses.append(a_loss.item())
-
-        dataset = Batch_DataSet(observations = observations, value_targets = value_targets, hxs = hxs, next_observations = next_observations, actions = actions)
+        dataset = Batch_DataSet(observations = observations, value_targets = value_targets, next_observations = next_observations, actions = actions)
         dataloader = DataLoader(dataset, batch_size=self.minibatch_size, num_workers=0, shuffle=True)
-        
+
         for _, batch in enumerate(dataloader):
-            for _ in range(self.n_updates):
+
+            for _ in range(self.num_processes * self.n_updates):
+
                 observations_batch = batch['observations_batch']
                 value_targets_batch = batch['value_targets_batch']
-                hxs_batch = batch['hxs_batch']
                 next_observations_batch = batch['next_observations_batch']
                 actions_batch = batch['actions_batch']
 
-                curiosity_loss = local_agent.curiosity.calc_loss(observations_batch, next_observations_batch, actions_batch)  
+                curiosity_loss = self.global_agent.curiosity.calc_loss(observations_batch, next_observations_batch, actions_batch)
 
-                current_values, _ = local_agent.actor_critic.critic.forward(observations_batch, hxs_batch)
+                current_values = self.global_agent.actor_critic.critic.forward(observations_batch)
 
-                critic_loss = self.c1 * torch.pow(current_values.squeeze(1) - value_targets_batch.detach(), 2).mean()
+                current_values = current_values.squeeze(1)
+
+                critic_loss = self.value_coeficient * torch.pow(current_values - value_targets_batch, 2).mean()
 
                 total_loss = curiosity_loss + critic_loss
                 
@@ -161,19 +149,7 @@ class TRPO(MethodBase):
 
                 total_loss.backward()
 
-                torch.nn.utils.clip_grad_norm_(self.global_agent.actor_critic.critic.parameters(), 0.5)
-                torch.nn.utils.clip_grad_norm_(self.global_agent.curiosity.parameters(), 0.5)
-
-                for local_param, global_param in zip(local_agent.actor_critic.critic.parameters(), self.global_agent.actor_critic.critic.parameters()):
-                    global_param._grad = local_param.grad
-
-                for local_param, global_param in zip(local_agent.curiosity.parameters(), self.global_agent.curiosity.parameters()):
-                    global_param._grad = local_param.grad
-
                 self.global_agent.optimizer.step()
-                
-                local_agent.actor_critic.critic.load_state_dict(self.global_agent.actor_critic.critic.state_dict())
-                local_agent.curiosity.load_state_dict(self.global_agent.curiosity.state_dict())
 
                 critic_losses.append(critic_loss.item())
                 curiosity_losses.append(curiosity_loss.item())

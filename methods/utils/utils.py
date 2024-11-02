@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from typing import Callable
 
-def cg(A: Callable, b: torch.Tensor, steps: int, tol: float = 1e-6) -> torch.Tensor: # noqa
+def conjugate_gradient(A: Callable, b: torch.Tensor, steps: int, tol: float = 1e-6) -> torch.Tensor:
     x = torch.zeros_like(b)
     r = b - A(x)
     d = r.clone()

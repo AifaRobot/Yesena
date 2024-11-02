@@ -1,10 +1,7 @@
-from wrappers.skip_and_frames_env import SkipAndFramesEnv
-from wrappers.vizdoomenv_basic import Vizdoomenv
-import torch
-import gym
-import gym_miniworld
-import torch
+import gymnasium as gym
+#import gym_miniworld
 import time
+from wrappers.skip_and_frames_env import SkipAndFramesEnv
 from agents import Agent
 
 
@@ -29,7 +26,7 @@ class MiniworldTest():
         while True:
             done = False
             observation = worker.reset()
-            #hx = torch.zeros(512)
+
             hx = agente.get_new_hx()
 
             while not done: 
@@ -37,7 +34,6 @@ class MiniworldTest():
                 time.sleep(0.1)
                 
                 action, next_hx = agente.get_action_max_prob(observation, hx)
-                #_, _, action, next_hx = agente.get_action(observation, hx)
 
                 next_state, reward, done = worker.step(action.item())
 
