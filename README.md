@@ -20,7 +20,7 @@ git clone https://github.com/AifaRobot/Yesena.git
 cd Yesena
 pip install -r requirements.txt
 ```
-## Ejemplos
+## Ejemplo
 
 ```python
 import argparse
