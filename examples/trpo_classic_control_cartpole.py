@@ -1,51 +1,38 @@
-import argparse
 from methods import TRPO
 from models import ActorCriticFactory5
 from workers import WorkerFactoryGymCartpole
 from tests import GymTestCartpole
 
 if __name__ == "__main__":
-    
-    args = argparse.ArgumentParser()
 
-    env_name = 'CartPole-v1'
-
-    args.add_argument('-lr', type=float, default=5e-5)
-    args.add_argument('-gamma', type=float, default=0.999)
-    args.add_argument('-value_coeficient', type=float, default=0.5)
-    args.add_argument('-entropy_coeficient', type=float, default=0.01)
-    args.add_argument('-clip', type=float, default=0.1)
-    args.add_argument('-minibatch_size', type=int, default=128)
-    args.add_argument('-batch_size', type=int, default=128)
-    args.add_argument('-epochs', type=int, default=10)
-    args.add_argument('-train', choices=('True','False'), default='True')
-    args.add_argument('-episodes', type=int, default=2000)
-    args.add_argument('-lam', type=float, default=1.0)
-    args.add_argument('-in_channels', type=int, default=4)
-    args.add_argument('-n_actions', type=int, default=2)
-    args.add_argument('-num_processes', type=int, default=3)
-    args.add_argument('-alpha', type=float, default=0.1)
-    args.add_argument('-beta', type=float, default=0.2)
-    args.add_argument('-damping', type=float, default=1e-3)
-    args.add_argument('-trust_region', type=float, default=0.001)
-    args.add_argument('-line_search_num', type=int, default=10)
-    args.add_argument('-k', type=int, default=10)
-    args.add_argument('-normalize', choices=('True','False'), default='True')
-
-    arguments = args.parse_args()
-
+    arguments = {
+        "env_name": "CartPole-v1",
+        "lr": 1e-5,
+        "gamma": 0.999,
+        "value_coeficient": 0.5,
+        "entropy_coeficient": 0.01,
+        "clip": 0.1,
+        "minibatch_size": 128,
+        "batch_size": 128,
+        "epochs": 10,
+        "episodes": 2000,
+        "lam": 1.0,
+        "in_channels": 4,
+        "n_actions": 2,
+        "num_processes": 3,
+        "damping": 1e-3,
+        "trust_region": 0.001,
+        "line_search_num": 10,
+        "k": 10,
+        "normalize": True,
+    }
 
     method = TRPO(
-        env_name = env_name,
-        main_model_factory = ActorCriticFactory5(arguments.in_channels, arguments.n_actions),
-        worker_factory = WorkerFactoryGymCartpole(env_name, arguments.in_channels, arguments.batch_size),
-        test_factory = GymTestCartpole(env_name, arguments.in_channels, arguments.batch_size, True),
+        main_model_factory = ActorCriticFactory5,
+        worker_factory = WorkerFactoryGymCartpole,
+        test_factory = GymTestCartpole,
         arguments = arguments,
     )
 
-    if(arguments.train == 'True'):
-        print('Modo: Entrenamiento')
-        method.train()
-    else:
-        print('Modo: Testeo')
-        method.test()
+    method.train()
+    method.test()

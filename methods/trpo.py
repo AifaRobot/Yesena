@@ -12,7 +12,7 @@ from methods.method_base import MethodBase
 '''
 
 class TRPO(MethodBase):
-    def __init__(self, env_name, main_model_factory, worker_factory, test_factory, 
+    def __init__(self, main_model_factory, worker_factory, test_factory, 
             arguments, curiosity_model_factory = '', optimizer = '', generalized_value = '', 
             generalized_advantage = '', save_path = ''):
         
@@ -21,7 +21,7 @@ class TRPO(MethodBase):
         super().__init__(arguments, main_model_factory, 
             worker_factory, test_factory, curiosity_model_factory, 
             optimizer, generalized_value, generalized_advantage,
-            save_path, env_name, self.name)
+            save_path, self.name)
 
         self.global_agent.optimizer = self.optimizer(
             list(self.global_agent.curiosity.parameters()) +

@@ -100,9 +100,9 @@ class WorkerFactoryGymLunarLander(WorkerFactory):
 
 class WorkerFactoryGymCarRacing(WorkerFactory):
 
-    def __init__(self, env_name, in_channels, batch_size, continuous=False):
+    def __init__(self, env_name, in_channels, batch_size):
         super().__init__(env_name, in_channels, batch_size)
-        self.continuous = continuous
+        self.continuous = True
 
     def create(self, agent):
         raw_env = gym.make(self.env_name)

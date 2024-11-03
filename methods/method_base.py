@@ -10,9 +10,7 @@ from methods.utils import SharedState
 
 class MethodBase:
     def __init__(self, arguments, main_model_factory, worker_factory, test_factory, curiosity_model_factory = '', optimizer = '', generalized_value = '', 
-        generalized_advantage = '', save_path = '', env_name = '', name = ''):
-
-        self.env_name = env_name
+        generalized_advantage = '', save_path = '', name = ''):
 
         self.default_learning_rate = 0.001
         self.default_epochs = 100
@@ -30,41 +28,50 @@ class MethodBase:
         self.default_k = 10
         self.default_gamma = 0.99
         self.default_lam = 1.0
-        self.default_critic_loss_cliping = 'False'
+        self.default_critic_loss_cliping = False
         self.default_critic_loss_clip = 0.2
-        self.default_verbose = 'True'
-        self.default_normalize = 'False'
+        self.default_verbose = True
+        self.default_normalize = False
+        self.default_n_actions = 4
+        self.default_test_render = True
+        self.default_alpha = 0.1
+        self.default_beta = 0.2
 
-        self.learning_rate = getattr(arguments, 'lr', self.default_learning_rate)
-        self.n_updates = getattr(arguments, 'epochs', self.default_epochs)
-        self.minibatch_size = getattr(arguments, 'minibatch_size', self.default_minibatch_size)
-        self.batch_size = getattr(arguments, 'batch_size', self.default_batch_size)
-        self.episodes = getattr(arguments, 'episodes', self.default_episodes)
-        self.in_channels = getattr(arguments, 'in_channels', self.default_in_channels)
-        self.num_processes = getattr(arguments, 'num_processes', self.default_num_processes)
-        self.clip = getattr(arguments, 'clip', self.default_clip)
-        self.value_coeficient = getattr(arguments, 'value_coeficient', self.default_value_coeficient)
-        self.entropy_coeficient = getattr(arguments, 'entropy_coeficient', self.default_entropy_coeficient)
-        self.damping = getattr(arguments, 'damping', self.default_damping)
-        self.trust_region = getattr(arguments, 'trust_region', self.default_trust_region)
-        self.line_search_num = getattr(arguments, 'line_search_num', self.default_line_search_num)
-        self.k = getattr(arguments, 'k', self.default_k)
-        self.gamma = getattr(arguments, 'gamma', self.default_gamma)
-        self.lam = getattr(arguments, 'lam', self.default_lam)
-        self.critic_loss_cliping = getattr(arguments, 'critic_loss_cliping', self.default_critic_loss_cliping) == 'True'
-        self.critic_loss_clip = getattr(arguments, 'critic_loss_clip', self.default_critic_loss_clip)
-        self.verbose = getattr(arguments, 'verbose', self.default_verbose) == 'True'
-        self.normalize = getattr(arguments, 'normalize', self.default_normalize) == 'True'
+        self.env_name = arguments.get('env_name', 'does_not_exist')
+        self.learning_rate = arguments.get('lr', self.default_learning_rate)
+        self.n_updates = arguments.get('epochs', self.default_epochs)
+        self.minibatch_size = arguments.get('minibatch_size', self.default_minibatch_size)
+        self.batch_size = arguments.get('batch_size', self.default_batch_size)
+        self.episodes = arguments.get('episodes', self.default_episodes)
+        self.in_channels = arguments.get('in_channels', self.default_in_channels)
+        self.num_processes = arguments.get('num_processes', self.default_num_processes)
+        self.clip = arguments.get('clip', self.default_clip)
+        self.value_coeficient = arguments.get('value_coeficient', self.default_value_coeficient)
+        self.entropy_coeficient = arguments.get('entropy_coeficient', self.default_entropy_coeficient)
+        self.damping = arguments.get('damping', self.default_damping)
+        self.trust_region = arguments.get('trust_region', self.default_trust_region)
+        self.line_search_num = arguments.get('line_search_num', self.default_line_search_num)
+        self.k = arguments.get('k', self.default_k)
+        self.gamma = arguments.get('gamma', self.default_gamma)
+        self.lam = arguments.get('lam', self.default_lam)
+        self.critic_loss_cliping = arguments.get('critic_loss_cliping', self.default_critic_loss_cliping)
+        self.critic_loss_clip = arguments.get('critic_loss_clip', self.default_critic_loss_clip)
+        self.verbose = arguments.get('verbose', self.default_verbose)
+        self.normalize = arguments.get('normalize', self.default_normalize)
+        self.n_actions = arguments.get('n_actions', self.default_n_actions)
+        self.test_render = arguments.get('test_render', self.default_test_render)
+        self.alpha = arguments.get('alpha', self.default_alpha)
+        self.beta = arguments.get('beta', self.default_beta)
 
-        self.curiosity_model_factory = NoCuriosityFactory() if(curiosity_model_factory == '') else curiosity_model_factory
+        self.curiosity_model_factory = NoCuriosityFactory() if(curiosity_model_factory == '') else curiosity_model_factory(self.in_channels, self.n_actions, self.alpha, self.beta)
         self.optimizer = Adam if(optimizer == '') else optimizer
-        self.generalized_value = Reward(self.gamma) if(generalized_value == '') else generalized_value
-        self.generalized_advantage = Advantage(self.gamma, self.lam, self.normalize) if(generalized_advantage == '') else generalized_advantage
-        self.save_path = ('saves/' if(save_path == '') else save_path) +  name + '-' + env_name
+        self.generalized_value = Reward(self.gamma) if(generalized_value == '') else generalized_value(self.gamma)
+        self.generalized_advantage = Advantage(self.gamma, self.lam, self.normalize) if(generalized_advantage == '') else generalized_advantage(self.gamma, self.lam, self.normalize)
+        self.save_path = ('saves/' if(save_path == '') else save_path) +  name + '-' + self.env_name
 
-        self.main_model_factory = main_model_factory
-        self.worker_factory = worker_factory
-        self.test_factory = test_factory
+        self.main_model_factory = main_model_factory(self.in_channels, self.n_actions)
+        self.worker_factory = worker_factory(self.env_name, self.in_channels, self.batch_size)
+        self.test_factory = test_factory(self.env_name, self.in_channels, self.batch_size, self.test_render)
 
         self.global_agent = Agent(
             self.main_model_factory,
@@ -72,7 +79,7 @@ class MethodBase:
             self.save_path
         )
 
-        self.logger = Logger(name, env_name)
+        self.logger = Logger(name, self.env_name)
 
     def update_metrics(self, ciclo, dict_metrics):
         self.logger.update_metrics(dict_metrics)

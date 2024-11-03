@@ -1,46 +1,37 @@
-import argparse
 from methods import TRPO
 from models import ActorCriticFactory5
 from workers import WorkerFactoryGymLunarLander
 from tests import GymTestLunarLander
 
 if __name__ == "__main__":
-    
-    args = argparse.ArgumentParser()
 
-    env_name = 'LunarLander-v3'
-
-    args.add_argument('-lr', type=float, default=0.0001)
-    args.add_argument('-gamma', type=float, default=0.999)
-    args.add_argument('-value_coeficient', type=float, default=0.5)
-    args.add_argument('-entropy_coeficient', type=float, default=0.01)
-    args.add_argument('-minibatch_size', type=int, default=128)
-    args.add_argument('-batch_size', type=int, default=1024)
-    args.add_argument('-epochs', type=int, default=4)
-    args.add_argument('-train', choices=('True','False'), default='True')
-    args.add_argument('-episodes', type=int, default=5000)
-    args.add_argument('-lam', type=float, default=1.0)
-    args.add_argument('-in_channels', type=int, default=8)
-    args.add_argument('-n_actions', type=int, default=4)
-    args.add_argument('-num_processes', type=int, default=2)
-    args.add_argument('-damping', type=float, default=0.1)
-    args.add_argument('-trust_region', type=float, default=0.001)
-    args.add_argument('-line_search_num', type=int, default=10)
-    args.add_argument('-k', type=int, default=10)
-
-    arguments = args.parse_args()
+    arguments = {
+        "env_name": "LunarLander-v3",
+        "lr": 1e-4,
+        "gamma": 0.999,
+        "value_coeficient": 0.5,
+        "entropy_coeficient": 0.01,
+        "clip": 0.1,
+        "minibatch_size": 128,
+        "batch_size": 1024,
+        "epochs": 4,
+        "episodes": 5000,
+        "lam": 1.0,
+        "in_channels": 8,
+        "n_actions": 4,
+        "num_processes": 2,
+        "damping": 0.1,
+        "trust_region": 0.001,
+        "line_search_num": 10,
+        "k": 10,
+    }
 
     method = TRPO(
-        env_name = env_name,
-        main_model_factory = ActorCriticFactory5(arguments.in_channels, arguments.n_actions),
-        worker_factory = WorkerFactoryGymLunarLander(env_name, arguments.in_channels, arguments.batch_size),
-        test_factory = GymTestLunarLander(env_name, arguments.in_channels, arguments.batch_size, True),
+        main_model_factory = ActorCriticFactory5,
+        worker_factory = WorkerFactoryGymLunarLander,
+        test_factory = GymTestLunarLander,
         arguments = arguments,
     )
 
-    if(arguments.train == 'True'):
-        print('Modo: Entrenamiento')
-        method.train()
-    else:
-        print('Modo: Testeo')
-        method.test()
+    method.train()
+    method.test()
