@@ -31,11 +31,14 @@ class MethodBase:
         self.default_critic_loss_cliping = False
         self.default_critic_loss_clip = 0.2
         self.default_verbose = True
-        self.default_normalize = False
+        self.default_advantages_normalize = False
+        self.default_value_targets_normalize = False
         self.default_n_actions = 4
         self.default_test_render = True
         self.default_alpha = 0.1
         self.default_beta = 0.2
+        self.default_show_processed_image = False
+        self.default_seed = ''
 
         self.env_name = arguments.get('env_name', 'does_not_exist')
         self.learning_rate = arguments.get('lr', self.default_learning_rate)
@@ -57,20 +60,23 @@ class MethodBase:
         self.critic_loss_cliping = arguments.get('critic_loss_cliping', self.default_critic_loss_cliping)
         self.critic_loss_clip = arguments.get('critic_loss_clip', self.default_critic_loss_clip)
         self.verbose = arguments.get('verbose', self.default_verbose)
-        self.normalize = arguments.get('normalize', self.default_normalize)
+        self.advantages_normalize = arguments.get('advantages_normalize', self.default_advantages_normalize)
+        self.value_targets_normalize = arguments.get('value_targets_normalize', self.default_value_targets_normalize)
         self.n_actions = arguments.get('n_actions', self.default_n_actions)
         self.test_render = arguments.get('test_render', self.default_test_render)
         self.alpha = arguments.get('alpha', self.default_alpha)
         self.beta = arguments.get('beta', self.default_beta)
+        self.show_processed_image = arguments.get('show_processed_image', self.default_show_processed_image)
+        self.seed = arguments.get('seed', self.default_seed)
 
         self.curiosity_model_factory = NoCuriosityFactory() if(curiosity_model_factory == '') else curiosity_model_factory(self.in_channels, self.n_actions, self.alpha, self.beta)
         self.optimizer = Adam if(optimizer == '') else optimizer
         self.generalized_value = Reward(self.gamma) if(generalized_value == '') else generalized_value(self.gamma)
-        self.generalized_advantage = Advantage(self.gamma, self.lam, self.normalize) if(generalized_advantage == '') else generalized_advantage(self.gamma, self.lam, self.normalize)
+        self.generalized_advantage = Advantage(self.gamma, self.lam) if(generalized_advantage == '') else generalized_advantage(self.gamma, self.lam)
         self.save_path = ('saves/' if(save_path == '') else save_path) +  name + '-' + self.env_name
 
         self.main_model_factory = main_model_factory(self.in_channels, self.n_actions)
-        self.worker_factory = worker_factory(self.env_name, self.in_channels, self.batch_size)
+        self.worker_factory = worker_factory(self.env_name, self.in_channels, self.batch_size, { 'show_processed_image' : self.show_processed_image, 'seed' : self.seed })
         self.test_factory = test_factory(self.env_name, self.in_channels, self.batch_size, self.test_render)
 
         self.global_agent = Agent(

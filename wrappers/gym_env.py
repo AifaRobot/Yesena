@@ -10,19 +10,23 @@ import numpy as np
 '''
 
 class GymEnv(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env, optional_params = {}):
         super(GymEnv, self).__init__(env)
         self.number_step = 0
+        self.seed = optional_params.get('seed', '')
     
     def reset(self, **kwargs):
+        if(self.seed != ''):
+            kwargs['seed'] = self.seed
+
         observation, _ = self.env.reset(**kwargs)
         self.number_step = 0
 
         return torch.tensor(observation)
 
 class GymEnvCartpole(GymEnv):
-    def __init__(self, env):
-        super(GymEnvCartpole, self).__init__(env)
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvCartpole, self).__init__(env, optional_params)
 
     def step(self, action):
         observation, reward, done, _, _ = self.env.step(action)
@@ -41,8 +45,8 @@ class GymEnvCartpole(GymEnv):
         return torch.from_numpy(observation).float(), reward, done
 
 class GymEnvAcrobot(GymEnv):
-    def __init__(self, env):
-        super(GymEnvAcrobot, self).__init__(env)
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvAcrobot, self).__init__(env, optional_params)
 
     def step(self, action):
         observation, reward, done, _, _ = self.env.step(action)
@@ -50,8 +54,8 @@ class GymEnvAcrobot(GymEnv):
         return torch.tensor(observation), reward, done
 
 class GymEnvLunarLander(GymEnv):
-    def __init__(self, env):
-        super(GymEnvLunarLander, self).__init__(env)
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvLunarLander, self).__init__(env, optional_params)
 
     def step(self, action):
         observation, reward, done, _, _ = self.env.step(action)
@@ -59,8 +63,8 @@ class GymEnvLunarLander(GymEnv):
         return torch.tensor(observation), reward, done
 
 class GymEnvCarRacing(GymEnv):
-    def __init__(self, env):
-        super(GymEnvCarRacing, self).__init__(env)
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvCarRacing, self).__init__(env, optional_params)
         self.env = env
         self.done_before = False
 
@@ -69,6 +73,9 @@ class GymEnvCarRacing(GymEnv):
         self.actions = [[0.0, 0.01, 0.0], [0.2, 0.01, 0.0], [-0.2, 0.01, 0.0], [0.4, 0.01, 0.0], [-0.4, 0.01, 0.0]]
 
     def reset(self, **kwargs):
+        if(self.seed != ''):
+            kwargs['seed'] = self.seed
+
         observation, _ = self.env.reset(**kwargs)
         self.steps = 0
         self.tiles = 0
@@ -106,16 +113,43 @@ class GymEnvCarRacing(GymEnv):
         
         return False
 
-class GymEnvMiniworld(GymEnv):
-    def __init__(self, env):
-        super(GymEnvMiniworld, self).__init__(env)
+class GymEnvVizdoomBasic(GymEnv):
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvVizdoomBasic, self).__init__(env, optional_params)
+        self.actions = [3, 1, 2]
 
     def reset(self, **kwargs):
+        if(self.seed != ''):
+            kwargs['seed'] = self.seed
+        
         observation, _ = self.env.reset(**kwargs)
 
-        return observation
+        return observation['screen']
 
     def step(self, action):
+
+        action = self.actions[action]
+
         observation, reward, done, info, _ = self.env.step(action)
 
-        return observation, reward, done, info
+        return observation['screen'], reward, done, info
+
+class GymEnvVizdoomMyWayHome(GymEnv):
+    def __init__(self, env, optional_params = {}):
+        super(GymEnvVizdoomMyWayHome, self).__init__(env, optional_params)
+        self.actions = [3, 4, 5]
+
+    def reset(self, **kwargs):
+        if(self.seed != ''):
+            kwargs['seed'] = self.seed
+
+        observation, _ = self.env.reset(**kwargs)
+
+        return observation['screen']
+
+    def step(self, action):
+        action = self.actions[action]
+
+        observation, reward, done, info, _ = self.env.step(action)
+
+        return observation['screen'], reward, done, info

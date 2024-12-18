@@ -3,10 +3,9 @@ from rewards import Reward
 from rewards.utils import discount
 
 class Advantage(Reward):
-    def __init__(self, gamma, tau, normalize = False):
+    def __init__(self, gamma, tau):
         self.gamma = gamma
         self.tau = tau
-        self.normalize = normalize
 
     '''
         La Estimación de Ventaja Generalizada (GAE) es un algoritmo utilizado en el aprendizaje por refuerzo para lograr con mayor precisión 
@@ -36,13 +35,10 @@ class Advantage(Reward):
         V es la función de valor de estado.
     '''
 
-    def calculate_generalized_advantage_estimate(self, rewards, values, dones):
-        delta_t = rewards + self.gamma * values[1:] * dones - values[:-1] # 1
+    def calculate_generalized_advantage_estimate(self, rewards, values, next_values, dones):
+        delta_t = rewards + self.gamma * next_values * dones - values # 1
 
         advantages = discount(delta_t, dones, self.gamma*self.tau)
-
-        if self.normalize:
-            advantages = (advantages - torch.mean(advantages)) / (torch.std(advantages) + 1e-8)
 
         return advantages
 

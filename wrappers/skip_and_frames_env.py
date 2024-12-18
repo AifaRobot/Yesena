@@ -5,7 +5,7 @@ import collections
 import numpy as np
 
 class SkipAndFramesEnv(gym.Wrapper):
-    def __init__(self, env, num_frames = 4, resize_image = (42, 42), initial_height = None, final_height = None):
+    def __init__(self, env, num_frames = 4, resize_image = (42, 42), initial_height = None, final_height = None, optional_params = {}):
         super(SkipAndFramesEnv, self).__init__(env)
 
         self.num_frames = num_frames
@@ -13,7 +13,8 @@ class SkipAndFramesEnv(gym.Wrapper):
         self.frames_stack = collections.deque(maxlen=num_frames)
         self.initial_height = initial_height
         self.final_height = final_height
-    
+        self.show_processed_image = optional_params.get('show_processed_image', False)
+
     def reset(self, **kwargs):
         observation = self.env.reset(**kwargs)
         observation = self.process_img(observation)
@@ -32,13 +33,16 @@ class SkipAndFramesEnv(gym.Wrapper):
 
         for _ in range(self.num_frames):
             observation, reward, done, _ = self.env.step(action)
-            #self.show_img(observation)
+
             total_reward += reward
 
             if done:
                 break
 
         observation = self.process_img(observation)
+
+        if(self.show_processed_image):
+            self.show_img(observation)
 
         self.frames_stack.append(observation)
 

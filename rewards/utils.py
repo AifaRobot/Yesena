@@ -1,45 +1,45 @@
 import torch
 
 '''
-    Discounted rewards are a common technique in reinforcement learning that helps agents learn more effectively in 
-    environments where rewards may occur in the future and may be correlated.
+    Las Recompensas Descontadas son una técnica común en el aprendizaje por refuerzo que ayuda a los agentes a aprender de manera más efectiva en 
+    entornos donde las recompensas pueden ocurrir en el futuro y pueden estar correlacionadas.
 
     G_{t} = R_{t+1} + γ * R_{t+2} +γʌ2 * R_{t+3} + … 
 
-    * G_{t} is the reward discounted over the passage of time.
-    
-    * R_{t+1} is the reward at the next time step after.
-    
-    * 𝛾 is the discount factor. Controls the relative importance of future rewards compared to immediate rewards. A
-    𝛾 closer to 1 indicates that future rewards are more important, while a 𝛾 closer to 0 indicates that future 
-    rewards are less important relative to immediate rewards.
-    
-    * The sum extends to infinity, but in practice it is usually limited to a finite number of future steps.
+    * G_{t} es la recompensa que se descuenta con el paso del tiempo.
 
-    The logic behind discounted rewards in reinforcement learning is to capture the concept of "value" in the long term. 
-    In environments where actions have long-term consequences and where rewards may be delayed in time, it is important 
-    for an agent to consider not only immediate rewards, but also future rewards.
+    * R_{t+1} es la recompensa en el siguiente paso.
 
-    Reward discounting serves to model the preference to receive a reward now rather than in the future, due to factors 
-    such as uncertainty, the possibility that the agent may cease to exist, or that the environment may change. The idea 
-    is that a future reward is “discounted” relative to its temporal delay and associated uncertainty.
+    * 𝛾 es el factor de descuento. Controla la importancia relativa de las recompensas futuras en comparación con las recompensas inmediatas. A
+    𝛾 más cercano a 1 indica que las recompensas futuras son más importantes, mientras que un 𝛾 más cercano a 0 indica que las recompensas futuras 
+    son menos importantes en relación con las recompensas inmediatas.
 
-    For example, in a game environment, a player might prefer a 10-point reward now to a 15-point reward in the future, 
-    due to the uncertainty of whether he or she will actually get the future reward and the benefit of having the reward 
-    immediately for use it in the game.
+    * La suma se extiende hasta el infinito, pero en la práctica suele limitarse a un número finito de pasos futuros.
 
-    Discounted rewards allow an agent to consider the long-term consequences of its actions and make decisions 
-    that maximize the total expected reward over time, taking into account uncertainty and delay in future rewards.
+    La lógica detrás de las recompensas con descuento en el aprendizaje por refuerzo es capturar el concepto de "valor" a largo plazo. 
+    En entornos donde las acciones tienen consecuencias a largo plazo y donde las recompensas pueden retrasarse en el tiempo, es importante 
+    que un agente considere no sólo las recompensas inmediatas, sino también las recompensas futuras.
+
+    El descuento de recompensas sirve para modelar la preferencia por recibir una recompensa ahora en lugar de en el futuro, debido a factores 
+    como la incertidumbre, la posibilidad de que el agente deje de existir o que el entorno cambie. La idea 
+    es que una recompensa futura se “descuente” en relación con su retraso temporal y la incertidumbre asociada.
+
+    Por ejemplo, en un entorno de juego, un jugador podría preferir una recompensa de 10 puntos ahora a una recompensa de 15 puntos en el futuro,
+    debido a la incertidumbre de si él o ella realmente obtendrá la recompensa futura y el beneficio de tener la recompensa 
+    inmediatamente para usarlo en el juego.
+
+    Las recompensas con descuento permiten a un agente considerar las consecuencias a largo plazo de sus acciones y tomar decisiones 
+    que maximizan la recompensa total esperada a lo largo del tiempo, teniendo en cuenta la incertidumbre y el retraso en las recompensas futuras.
 '''
 
 def discount(rewards, dones, gamma):
     value_targets = []
     old_value_target = 0
 
-    for t in reversed(range(len(rewards)-1)):
+    for t in reversed(range(len(rewards))):
         old_value_target = rewards[t] + gamma*old_value_target*dones[t]
         value_targets.append(old_value_target)
 
     value_targets.reverse()
 
-    return torch.tensor(value_targets)
+    return  torch.tensor(value_targets)

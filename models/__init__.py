@@ -5,6 +5,7 @@ from models.actor_critic_network_3 import ActorCriticFactory3
 from models.actor_critic_network_4 import ActorCriticFactory4
 from models.actor_critic_network_5 import ActorCriticFactory5
 from models.actor_critic_network_6 import ActorCriticFactory6
+from models.actor_critic_network_7 import ActorCriticFactory7
 from models.curiosity_network import CuriosityFactory
 from models.no_curiosity_network import NoCuriosityFactory
 from models.network_base import NetworkBase

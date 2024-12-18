@@ -43,6 +43,4 @@ class Worker:
             self.hx = next_hx
             self.observation = next_observation
 
-        _, last_value, _, _, _ = self.agente.get_action(self.observation, self.hx)
-
-        return [observations, actions, rewards, dones, values, log_probs, hxs, intrinsic_rewards, last_value.unsqueeze(0), distributions]
+        return [observations, actions, rewards, dones, values, log_probs, hxs, intrinsic_rewards, distributions]
