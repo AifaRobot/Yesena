@@ -7,22 +7,22 @@
 <p>Vizdoom</p>
 
 <p>
-  <img src="docs/images/vizdoom-example-1.gif" alt="" width="49%" height="300px"/>
-  <img src="docs/images/vizdoom-example-2.gif" alt="" width="49%" height="300px"/>
+  <img src="docs/images/vizdoom-example-1.gif" alt="Vizdoom Example 1" width="49%" height="300px"/>
+  <img src="docs/images/vizdoom-example-2.gif" alt="Vizdoom Example 2" width="49%" height="300px"/>
 </p>
 
 <p>Clasic Control</p>
 
 <p>
-  <img src="docs/images/classic-control-example-1.gif" alt="" width="49%" height="300px"/>
-  <img src="docs/images/classic-control-example-2.gif" alt="" width="49%" height="300px"/>
+  <img src="docs/images/classic-control-example-1.gif" alt="Classic Control Example 1" width="49%" height="300px"/>
+  <img src="docs/images/classic-control-example-2.gif" alt="Classic Control Example 2" width="49%" height="300px"/>
 </p>
 
 <p>Box 2D</p>
 
 <p>
-  <img src="docs/images/box2d-example-1.gif" alt="" width="49%" height="300px"/>
-  <img src="docs/images/box2d-example-2.gif" alt="" width="49%" height="300px"/>
+  <img src="docs/images/box2d-example-1.gif" alt="Box2d Example 1" width="49%" height="300px"/>
+  <img src="docs/images/box2d-example-2.gif" alt="Box2d Example 2" width="49%" height="300px"/>
 </p>
 
 <p><img src="docs/images/subtitle-table-content.png" alt="Content" height="50px" /></p>
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 <p>When the agent has completed the training, the following will be executed:</p>
 
-<p><img src="docs/images/box2d-example-2.gif" alt="" width="49%" height="300px"/></p>
+<p><img src="docs/images/box2d-example-2.gif" alt="CMD Console Box2D Final Example" width="49%" height="300px"/></p>
 
 <p><img src="docs/images/subtitle-license.png" alt="License" id="license" height="50px" style="margin: 20px 0px" /></p>
 
