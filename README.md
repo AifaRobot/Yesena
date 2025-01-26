@@ -11,8 +11,6 @@
   <img src="docs/images/vizdoom-example-2.gif" alt="" width="49%" height="300px"/>
 </p>
 
-<hr/>
-
 <p>Clasic Control</p>
 
 <p>
@@ -90,11 +88,11 @@ if __name__ == "__main__":
 
 <p>To run this example, you need to go to the root folder of the project with the command prompt and run the following command:</p>
 
-<p><img src="docs/images/console-example.png" alt="CMD Console Example" width="70%" style="margin: 10px 0px" /></p>
+<p><img src="docs/images/console-example.png" alt="CMD Console Example" width="100%" style="margin: 10px 0px" /></p>
 
 <p>This command will create an agent to train in the lunar lander environment:</p>
 
-<p><img src="docs/images/console-example-training.png" alt="CMD Console Training" width="70%" style="margin: 10px 0px" /></p>
+<p><img src="docs/images/console-example-training.png" alt="CMD Console Training" width="100%" style="margin: 10px 0px" /></p>
 
 <p>When the agent has completed the training, the following will be executed:</p>
 
