@@ -25,7 +25,7 @@
   <img src="docs/images/box2d-example-2.gif" alt="Box2d Example 2" width="49%" height="300px"/>
 </p>
 
-<p><img src="docs/images/subtitle-table-content.png" alt="Content" height="50px" /></p>
+<p><img src="docs/images/subtitle-content.png" alt="Content" height="50px" /></p>
 
 - [Description](#description)
 - [Installation](#installation)
