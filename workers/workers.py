@@ -5,8 +5,7 @@ from workers.worker import Worker
 from vizdoom import gymnasium_wrapper
 
 '''
-    Aquí están todos los encargados de crear los Workers. Cada Worker necesita una configuración diferente dependiendo
-    del entorno.
+    Here are all those in charge of creating the Workers. Each Worker needs a different configuration depending
 '''
 
 class WorkerFactory:

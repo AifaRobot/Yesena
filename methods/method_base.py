@@ -104,8 +104,6 @@ class MethodBase:
 
     def train(self):
 
-        #mp.set_start_method('spawn')
-
         barrier = mp.Barrier(self.num_processes)
 
         lock = mp.Lock()

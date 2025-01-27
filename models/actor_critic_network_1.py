@@ -21,7 +21,6 @@ class ActorCriticNetwork1(NetworkBase):
         )
 
         self.actor_output = nn.Sequential(
-            #nn.Linear(512, 256),
             nn.Linear(128, 256),
             Swish(),
             nn.Linear(256, 256),
@@ -31,7 +30,6 @@ class ActorCriticNetwork1(NetworkBase):
         )
 
         self.critic_output = nn.Sequential(            
-            #nn.Linear(512, 256),
             nn.Linear(128, 256),
             Swish(),
             nn.Linear(256, 256),

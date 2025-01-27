@@ -5,16 +5,15 @@ from torch.distributions import Categorical
 from methods.method_base import MethodBase
 
 '''
-    PPO significa Optimización de Políticas Próximas, es un algoritmo de aprendizaje por refuerzo (RL) popular y eficaz. 
-    Se utiliza para capacitar a agentes de RL en entornos donde las acciones afectan directamente las recompensas que recibe el agente. PPO 
-    se centra en optimizar las políticas de decisión del agente de una manera estable y eficiente.
+    PPO stands for Proximate Policy Optimization, it is a popular and effective reinforcement learning (RL) algorithm. 
+    It is used to train RL agents in environments where actions directly affect the rewards the agent receives. PPO 
+    focuses on optimizing the agent's decision policies in a stable and efficient way.
 
-    Una característica clave de PPO es su enfoque en la actualización de las políticas "proximalmente", lo que significa que limita cuánto 
-    puede cambiar la política en cada paso de actualización. Esto ayuda a evitar cambios políticos drásticos que podrían ser perjudiciales 
-    para el aprendizaje.
+    A key feature of PPO is its focus on updating policies “proximally,” meaning it limits how much the policy can change 
+    in each update step. This helps avoid drastic policy changes that could be detrimental to learning.
 
-    PPO ha demostrado ser eficaz en una variedad de entornos RL y es especialmente popular en aplicaciones de control y juegos. 
-    donde se necesita un aprendizaje estable y eficiente.
+    PPO has proven effective in a variety of RL environments and is especially popular in gaming and control applications 
+    where stable and efficient learning is needed.
 '''
 
 class PPO(MethodBase):

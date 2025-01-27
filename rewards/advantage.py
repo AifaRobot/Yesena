@@ -8,31 +8,30 @@ class Advantage(Reward):
         self.tau = tau
 
     '''
-        La Estimación de Ventaja Generalizada (GAE) es un algoritmo utilizado en el aprendizaje por refuerzo para lograr con mayor precisión 
-        estimar rendimientos descontados y valores estatales en un proceso de decisión de Markov (MDP).
+        Generalized Advantage Estimation (GAE) is an algorithm used in reinforcement learning to more accurately estimate 
+        discounted returns and state values ​​in a Markov decision process (MDP).
 
-        La ventaja en el aprendizaje por refuerzo se refiere a cuánto mejor es una acción específica en comparación con otras 
-        posibles acciones en un estado dado. La idea básica detrás de GAE es combinar el uso de múltiples pasos de tiempo. 
-        para estimar las ventajas con un factor de descuento, similar a cómo se calculan las recompensas con descuento. Esto permite 
-        una estimación más estable y eficiente de la ventaja que tener en cuenta sólo un paso en el tiempo.
+        Advantage in reinforcement learning refers to how much better a specific action is compared to other possible 
+        actions in a given state. The basic idea behind GAE is to combine the use of multiple time steps. to estimate 
+        benefits with a discount factor, similar to how discounted rewards are calculated. This allows for a more stable 
+        and efficient estimation of the advantage than taking into account only one step in time.
 
-        La recompensa de un determinado paso de tiempo no sólo se ve afectada por la acción actual, sino también por todas las acciones futuras realizadas. 
-        Esto se debe a que es posible que incluso si se realiza una acción con una buena recompensa en un determinado paso de tiempo, en el futuro 
-        Es posible que las acciones no devuelvan tan buenas recompensas, lo que a largo plazo llevaría a un peor desempeño del agente. 
-        Por el contrario, puede suceder que realizar una acción en un determinado momento devuelva una mala recompensa, pero esas acciones 
-        futuras obtienen buenas recompensas, lo que a la larga conduciría a un mejor desempeño del agente.
+        The reward for a given time step is not only affected by the current action, but also by all future actions taken. 
+        This is because it is possible that even if an action with a good reward is performed at a certain time step, in the 
+        future the actions may not return such good rewards, which in the long run would lead to worse performance of the agent. 
+        On the contrary, it may happen that performing an action at a certain time returns a bad reward, but those future actions 
+        obtain good rewards, which in the long run would lead to better performance of the agent.
 
         A^GAE_t = \sum_{l=0}^{\infty} (\gamma \lambda)^l \delta_{t+l}
 
-        * A^GAE_t es la ventaja estimada en el paso de tiempo t.
+        * A^GAE_t is the estimated advantage at time step t.
 
-        * γ es el factor de descuento.
+        * γ is the discount factor.
 
-        * λ es un parámetro que controla el equilibrio entre sesgo y varianza.
+        * λ It is a parameter that controls the balance between bias and variance.
 
-        * δ_{t+l} es el error temporal o error TD en el paso de tiempo t+l, calculado como
-        δ_{t+l} = r_{t+l} + γ * V(s_{t+l+1}) − V(s_{t+l}), donde r_{t+l} es la recompensa en el paso de tiempo t+l y
-        V es la función de valor de estado.
+        * δ_{t+l} is the temporal error or TD error at time step t+l, calculated as δ_{t+l} = r_{t+l} + γ * V(s_{t+l+1} ) − V(s_{t+l}), 
+        where r_{t+l} is the reward at time step t+l and V is the state value function.
     '''
 
     def calculate_generalized_advantage_estimate(self, rewards, values, next_values, dones):
@@ -43,23 +42,23 @@ class Advantage(Reward):
         return advantages
 
 '''
-    1. El error temporal se utiliza para estimar en qué medida difiere la recompensa real obtenida en un paso de tiempo específico. 
-    de la recompensa esperada según la estimación actual del agente. Es parte fundamental del refuerzo. 
-    algoritmos de aprendizaje como TD-learning o Q-learning.
+    1. Temporal error is used to estimate how much the actual reward obtained differs at a specific time step. of the 
+    expected reward according to the agent's current estimate. It is a fundamental part of the reinforcement. learning 
+    algorithms such as TD-learning or Q-learning.
 
-    La fórmula general para el error temporal en un paso de tiempo t es:
+    The general formula for the temporal error at a time step t is:
     
     δ_{t} = r_{t} + γ * V(s_{t+1}) − V(s_{t} )
 
-    Donde:
+    Where:
 
-    * δ_{t} es el error temporal en el paso de tiempo t.
+    * δ_{t} is the temporal error at time step t.
 
-    * r_{t} es la recompensa obtenida en el paso de tiempo t.
+    * r_{t} is the reward obtained at time step t.
 
-    * γ es el factor de descuento.
+    * γ is the discount factor.
 
-    * V(s_{t+1}) es la estimación de la función de valor del siguiente estado s_{t+1}.
+    * V(s_{t+1}) is the estimate of the value function of the next state s_{t+1}.
 
-    * V(s_{t}) es la estimación de la función de valor del estado actual s_{t}.
+    * V(s_{t}) is the estimate of the value function of the current state s_{t}.
 ''' 

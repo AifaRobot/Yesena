@@ -4,29 +4,30 @@ from wrappers.gym_env import GymEnvCartpole, GymEnvAcrobot, GymEnvLunarLander, G
 from wrappers.skip_and_frames_env import SkipAndFramesEnv
 
 '''
-    En este archivo se guardan las pruebas de los agentes. Cuando un agente termina de entrenar en un entorno, se podrá ejecutar  
-    un test que permitirá demostrar cómo se desempeña el agente. 
+    The agents' evidence is saved in this file. When an agent finishes training in an environment, a test can be run to 
+    demonstrate how the agent performs.
 
-    Cada test tiene el método run que se ejecuta para iniciar el bucle donde el agente jugara el entorno. 
+    Each test has the run method that is executed to start the loop where the agent will play the environment.
 
-    La diferencia fundamental entre el periodo de prueba y el de entrenamiento es que, en el entrenamiento, el agente en cada estado elige una 
-    acción usando las probabilidades que le brinda el agente, pero teniendo cierta aleatoriedad. Sin embargo, en el periodo de prueba la acción que se 
-    elegirá en cada estado siempre es la que tiene mayor probabilidad. Esto se debe a que en el entrenamiento debe tener cierta aleatoriedad al  
-    momento de elegir una acción porque el agente debe explorar todas las posibles acciones para conocer el camino que le de mayor recompensa. 
-    En cambio, en el periodo de prueba no es necesario que haiga aleatoriedad porque ya hemos entrenado y por lo tanto las acciones deben ser 
-    solamente aquellas que la agente esta mayormente seguro que serán beneficiosas. 
+    The fundamental difference between the testing period and the training period is that, in training, the agent in each 
+    state chooses an action using the probabilities provided by the agent, but having a certain randomness. However, in the 
+    trial period the action that will be chosen in each state is always the one with the highest probability. This is because 
+    training must have a certain randomness when choosing an action because the agent must explore all possible actions to know 
+    the path that gives the greatest reward. On the other hand, in the testing period there is no need for randomness because 
+    we have already trained and therefore the actions should only be those that the agent is mostly sure will be beneficial.
 
-    Veamos un ejemplo: 
+    Let's look at an example:
 
-    Tenemos un agente que se encuentra en un determinado estado y tiene que elegir entre dos acciones. Luego de procesar ese estado, devuelve  
-    las siguientes probabilidades: [0.75, 0.25]: 
+    We have an agent who is in a certain state and has to choose between two actions. After processing that state, it returns 
+    the following probabilities: [0.75, 0.25]:
 
-    * En el periodo entrenamiento el agente elegirá una de las dos acciones de manera aleatoria, pero teniendo en cuenta esas probabilidades, 
-    es decir que habrá una probabilidad del 75% de que se elija la primera acción y un 25% de que se elija la segunda.  
+    * In the training period the agent will choose one of the two actions at random, but taking these probabilities into 
+    account, that is, there will be a 75% probability that the first action will be chosen and a 25% probability that the 
+    second will be chosen. .
 
-    * En el periodo de prueba se elegirá aquella acción con mayor probabilidad porque es aquella que es más seguro que devuelva la recompensa más alta a  
-    lo largo del episodio. Es decir que elegirá la primera porque al ser la que tiene mayor probabilidad, debe ser la que devuelva una  
-    recompensa mayor a largo plazo. 
+    * In the trial period, the action with the highest probability will be chosen because it is the one that is most likely 
+    to return the highest reward throughout the episode. That is to say, it will choose the first because, since it is the 
+    one with the greatest probability, it must be the one that returns a greater reward in the long term.
 '''
 
 class GymTestAcrobot():

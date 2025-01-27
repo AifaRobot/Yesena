@@ -6,9 +6,9 @@ from torch.distributions import Categorical
 from methods.method_base import MethodBase
 
 '''
-    Trust Region Policy Optimization (TRPO) es un algoritmo de aprendizaje por refuerzo diseñado para optimizar políticas en 
-    entornos continuos y de gran dimensión, como en robótica o juegos complejos. TRPO se centra en mejorar la estabilidad y 
-    eficiencia de las actualizaciones de políticas para evitar cambios drásticos que puedan degradar el rendimiento.
+    Trust Region Policy Optimization (TRPO) is a reinforcement learning algorithm designed to optimize policies 
+    in continuous, high-dimensional environments, such as in robotics or complex games. TRPO focuses on improving 
+    the stability and efficiency of policy updates to avoid drastic changes that can degrade performance.
 '''
 
 class TRPO(MethodBase):
@@ -34,8 +34,8 @@ class TRPO(MethodBase):
         grads = torch.autograd.grad(loss, self.global_agent.actor_critic.actor.parameters())
         j = torch.cat([g.view(-1) for g in grads]).data
 
-        # Se crea la funcion para calcular el producto del Vector Fisher. El Vector Fisher cuantifica cómo cambia la función de costo en 
-        # la dirección específica dada por y
+        # The function is created to calculate the product of the Fisher Vector. The Fisher 
+        # Vector quantifies how the cost function changes in the specific direction given by y
         def fisher_vector_product(y):
             kl = loss_fn()["kl"]
 
@@ -48,18 +48,18 @@ class TRPO(MethodBase):
             flat_grads = torch.cat([g.contiguous().view(-1) for g in grads]).data
             return flat_grads + y * self.damping
 
-        # Calculamos el gradiente conjugado para conocer la direccion de cambio de nuestros pesos y sesgos de la red actor
+        # We calculate the conjugate gradient to know the direction of change of our weights and biases of the actor network
         opt_dir = conjugate_gradient(fisher_vector_product, -j, self.k) 
         quadratic_term = (opt_dir * fisher_vector_product(opt_dir)).sum()
-        # beta es la magnitud del máximo paso posible y se calcula con la siguiente ecuación β = (2 * δ) / (s^T * Hs)
+        # beta is the magnitude of the maximum possible step and is calculated with the following equation β = (2 * δ) / (s^T * Hs)
         beta = torch.sqrt(2 * self.trust_region / (quadratic_term + 1e-6))
-        # El paso optimo se calcula como la multiplicacion entre beta (la longitud del paso) y opt_dir (la direccion del paso)
+        # The optimal step is calculated as the multiplication between beta (the length of the step) and opt_dir (the direction of the step)
         opt_step = beta * opt_dir
 
         with torch.no_grad():
             old_loss = loss_fn()["actor_loss"]
-            # Se obtienen los pesos y sesgos de la red neuronal actor para utilizarlos en caso de que el 
-            # procesos de line search no mejore la perdida del actor
+            # The weights and biases of the actor neural network are obtained to be used in case the line 
+            # search process does not improve the actor's loss
             flat_params = get_flat_params_from(self.global_agent.actor_critic.actor) 
             exponent_shrink = 1
             params_updated = False
@@ -67,27 +67,27 @@ class TRPO(MethodBase):
             for _ in range(self.line_search_num):
                 new_params = flat_params + opt_step * exponent_shrink
 
-                # Se reemplazan los pesos y sesgos de la red neuronal actor por los nuevos
+                # The weights and biases of the actor neural network are replaced with the new ones
                 set_flat_params_to(new_params, self.global_agent.actor_critic.actor)
                 tmp = loss_fn()
                 new_loss = tmp["actor_loss"]
                 new_kl = tmp["kl"]
 
-                # Se resta la recompensa vieja con la nueva. Si el resultado es positivo significa que hubo una mejora porque 
-                # se redujo el error
+                # The old reward is subtracted from the new one. If the result is positive it means that there 
+                # was an improvement because the error was reduced
                 improvement = old_loss - new_loss 
 
                 if new_kl < self.trust_region and improvement >= 0 and torch.isfinite(new_loss):
-                    # Si la divergencia de kullback-leibler es es menor a la region de confianza y la nueva perdida es menor a la 
-                    # perdida vieja, se termina el bucle y se deja el actor con los nuevos pesos y sesgos
+                    # If the kullback-leibler divergence is less than the confidence region and the new loss is 
+                    # less than the old loss, the loop ends and the actor is left with the new weights and biases
                     params_updated = True
                     break
 
                 exponent_shrink *= 0.5
 
             if not params_updated:
-                # Si los nuevos pesos y sesgos de la red neuronal actor no reducen la funcion de perdida, reemplaza todos los pesos y sesgos 
-                # por los que tenia inicialmente
+                # If the new weights and biases of the actor neural network do not reduce the loss function, 
+                # replace all the weights and biases with the ones it initially had
                 set_flat_params_to(flat_params, self.global_agent.actor_critic.actor)
 
     def trpo_step(self, observations, actions, old_log_probs, old_distributions, advantages):

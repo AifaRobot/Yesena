@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 
 '''
-    Aquí encontrarás los wrappers para todos los entornos que soporta Yesena.
-    Cada wrapper funciona como una conexión entre el juego y el agente, lo que permite que las respuestas dadas por 
-    elentorno se conviertan en algo mas comprensible para el agente.
+    Here you will find the wrappers for all the environments that Yesena supports. Each wrapper functions 
+    as a connection between the game and the agent, allowing the responses given by the environment to become 
+    something more understandable to the agent.
 '''
 
 class GymEnv(gym.Wrapper):
